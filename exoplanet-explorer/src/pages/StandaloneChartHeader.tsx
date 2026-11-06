@@ -20,14 +20,14 @@ export function StandaloneChartHeader() {
         flexShrink: 0
       }}
     >
-      <Group justify={'space-between'} gap={'sm'}>
+      <Group justify={'space-between'} gap={'sm'} wrap={'nowrap'}>
         <ConnectionStatusHint />
         {dataFileName && (
           <Text size={'xs'} c={'dimmed'} truncate={'end'} maw={240}>
             {dataFileName}
           </Text>
         )}
-        <Group gap={'sm'}>
+        <Group gap={'sm'} wrap={'nowrap'}>
           {autoSync && (
             <Text size={'xs'} c={'dimmed'} mt={4} role={'status'}>
               {filteredIds === undefined
@@ -37,12 +37,15 @@ export function StandaloneChartHeader() {
           )}
           <Checkbox
             label={'Sync filtering from OpenSpace'}
+            visibleFrom={'sm'}
             checked={autoSync}
             onChange={(event) =>
               dispatch(setAutoSyncOpenSpaceSelection(event.currentTarget.checked))
             }
           />
-          <ColorSchemeToggle />
+          <Box visibleFrom={'sm'}>
+            <ColorSchemeToggle />
+          </Box>
         </Group>
       </Group>
     </Box>
