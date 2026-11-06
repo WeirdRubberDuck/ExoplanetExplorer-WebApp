@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import { useMantineColorScheme } from '@mantine/core';
+import { useInactiveColor } from '@/hooks/colors.ts';
 
 import { CanvasLines, type CanvasLinesProps } from './CanvasLines.tsx';
 
@@ -8,18 +7,7 @@ interface Props extends CanvasLinesProps {
 }
 
 export function GhostLines(props: Props) {
-  const { colorScheme } = useMantineColorScheme();
+  const inactiveColor = useInactiveColor();
 
-  const ghostLineColor = useMemo(() => {
-    const colorVariable =
-      colorScheme === 'dark' ? '--mantine-color-dark-5' : '--mantine-color-dark-0';
-
-    const resolvedColor = getComputedStyle(document.documentElement)
-      .getPropertyValue(colorVariable)
-      .trim();
-
-    return resolvedColor;
-  }, [colorScheme]);
-
-  return <CanvasLines {...props} strokeColor={ghostLineColor} />;
+  return <CanvasLines {...props} strokeColor={inactiveColor} />;
 }

@@ -5,6 +5,7 @@ import { useResizeObserver, useThrottledValue } from '@mantine/hooks';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks.ts';
 import { setParallelCoordinatesColumnOrder } from '@/redux/local/localSlice.ts';
 import type { Column, DataItem, UncertaintyDataItem } from '@/types/types.ts';
+import { ACTIVE_COLOR } from '@/utils/constants.ts';
 
 import { Axes } from './Axes/Axes.tsx';
 import { CanvasLines } from './Lines/CanvasLines.tsx';
@@ -207,7 +208,7 @@ export function ParallelCoordinatesChart({
             <CanvasLines
               {...linesProps}
               data={filteredData.rows}
-              strokeColor={'steelblue'}
+              strokeColor={ACTIVE_COLOR}
             />
 
             {/* Axes */}

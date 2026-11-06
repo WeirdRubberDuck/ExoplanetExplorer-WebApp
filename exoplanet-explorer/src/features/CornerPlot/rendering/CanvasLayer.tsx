@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
+import { useInactiveColor } from '@/hooks/colors';
 import type { Column } from '@/types/types';
+import { ACTIVE_COLOR } from '@/utils/constants';
 
 import { buildDensityBins, type CornerPoint, getCellKey } from '../helpers';
 
 const SCATTER_POINT_SIZE = 2;
-const SELECTED_POINT_COLOR = '#4C84C3';
-const MUTED_POINT_COLOR = '#8CA3BD';
 const SCATTER_RENDER_CHUNK_SIZE = 500;
 
 interface Margin {
@@ -43,6 +43,8 @@ export function CanvasLayer({
   visiblePointIdSet
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const inactiveColor = useInactiveColor();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -160,8 +162,8 @@ export function CanvasLayer({
         ctx.clip();
 
         if (hasActiveCornerFilter) {
-          ctx.globalAlpha = 0.08;
-          ctx.fillStyle = MUTED_POINT_COLOR;
+          ctx.globalAlpha = 0.6;
+          ctx.fillStyle = inactiveColor;
           chunk.forEach((point) => {
             if (visiblePointIdSet?.has(point.id)) {
               return;
@@ -176,7 +178,7 @@ export function CanvasLayer({
         }
 
         ctx.globalAlpha = hasActiveCornerFilter ? 0.72 : 0.6;
-        ctx.fillStyle = SELECTED_POINT_COLOR;
+        ctx.fillStyle = ACTIVE_COLOR;
         chunk.forEach((point) => {
           if (hasActiveCornerFilter && !visiblePointIdSet?.has(point.id)) {
             return;
