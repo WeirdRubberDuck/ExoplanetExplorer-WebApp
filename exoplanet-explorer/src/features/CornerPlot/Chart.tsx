@@ -9,7 +9,7 @@ import type { Column, DataItem } from '@/types/types';
 import { CanvasLayer } from './rendering/CanvasLayer';
 import { SvgLayer } from './rendering/SvgLayer';
 import { CornerPlotSettings } from './Settings/Settings';
-import { getCellKey, getCellPointsFromRows } from './helpers';
+import { getCellKey, getCellPointsFromRows, getCellRenderMode } from './helpers';
 import { useCornerPlotBrushing } from './useCornerPlotBrushing';
 import { useCornerPlotFilterSync } from './useCornerPlotFilterSync';
 import { buildNumericScale, getScaleDomain, type NumericScale } from './util';
@@ -151,9 +151,14 @@ export function CornerPlotChart({
 
     selectedNumericColumns.forEach((yColumn, rowIndex) => {
       selectedNumericColumns.forEach((xColumn, colIndex) => {
-        const shouldIncludeCell = settings.invertLayout
-          ? rowIndex <= colIndex
-          : rowIndex >= colIndex;
+        const shouldIncludeCell =
+          rowIndex === colIndex ||
+          getCellRenderMode(
+            rowIndex,
+            colIndex,
+            settings.renderMode,
+            settings.invertLayout
+          ) !== undefined;
 
         if (!shouldIncludeCell) {
           return;
@@ -164,7 +169,40 @@ export function CornerPlotChart({
     });
 
     return new Map(entries);
-  }, [data, selectedNumericColumns, scales, settings.invertLayout]);
+  }, [data, selectedNumericColumns, scales, settings.invertLayout, settings.renderMode]);
+
+  useEffect(() => {
+    const brushes = [
+      ...activeBrushes,
+      ...(brushDraft ? [brushDraft] : []),
+      ...(movingBrushDraft ? [movingBrushDraft.originBrush] : [])
+    ];
+
+    brushes.forEach((brush) => {
+      const rowIndex = selectedNumericColumns.indexOf(brush.yColumn);
+      const colIndex = selectedNumericColumns.indexOf(brush.xColumn);
+      if (
+        rowIndex < 0 ||
+        colIndex < 0 ||
+        getCellRenderMode(
+          rowIndex,
+          colIndex,
+          settings.renderMode,
+          settings.invertLayout
+        ) === undefined
+      ) {
+        clearBrushesForCell(brush.xColumn, brush.yColumn);
+      }
+    });
+  }, [
+    activeBrushes,
+    brushDraft,
+    movingBrushDraft,
+    clearBrushesForCell,
+    selectedNumericColumns,
+    settings.invertLayout,
+    settings.renderMode
+  ]);
 
   useEffect(() => {
     const selectedColumnsKey = selectedNumericColumns.join('|');
@@ -256,6 +294,7 @@ export function CornerPlotChart({
               cellPointsByKey={cellPointsByKey}
               hoveredId={hoveredId}
               hoveredUncertainty={hoveredUncertainty}
+              renderMode={settings.renderMode}
               invertLayout={settings.invertLayout}
               brushDraft={brushDraft}
               activeBrushes={activeBrushes}

@@ -59,7 +59,7 @@ export interface LocalState {
     defaultColumns: Column[];
     settings: {
       selectedColumns: Column[];
-      renderMode: 'scatter' | 'density';
+      renderMode: 'scatter' | 'density' | 'both';
       invertLayout: boolean;
       clipExtremes: boolean;
     };
@@ -77,6 +77,7 @@ type ParallelCoordinatesVisualSettings = Omit<
   'selectedColumns'
 >;
 type CornerPlotSettings = LocalState['cornerPlot']['settings'];
+export type CornerPlotRenderMode = CornerPlotSettings['renderMode'];
 type CornerPlotVisualSettings = Omit<CornerPlotSettings, 'selectedColumns'>;
 
 const initialState: LocalState = {
@@ -105,7 +106,7 @@ const initialState: LocalState = {
     columnSelectionIsDefault: true,
     settings: {
       selectedColumns: cornerDefaultColumns,
-      renderMode: 'scatter',
+      renderMode: 'both',
       invertLayout: true,
       clipExtremes: true
     },
