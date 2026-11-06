@@ -166,7 +166,14 @@ export function ParallelCoordinatesChart({
   );
 
   return (
-    <Stack gap={'xs'} style={standalone ? { height: '100%', minHeight: 450 } : undefined}>
+    <Stack
+      gap={'xs'}
+      style={
+        standalone
+          ? { height: '100%', minHeight: 450 }
+          : { maxWidth: '100%', minWidth: 0 }
+      }
+    >
       {!hideTopBar && (
         <Group gap={'xs'} align={'center'}>
           <SettingsParallelCoordinates />
@@ -194,6 +201,7 @@ export function ParallelCoordinatesChart({
           maxHeight: standalone ? undefined : maxHeight,
           minHeight: 200,
           width: standalone ? '100%' : defaultWidth,
+          maxWidth: standalone ? undefined : '100%',
           minWidth: standalone ? Math.max(600, dimensions.length * 90 + 250) : undefined,
           overflow: 'hidden'
         }}

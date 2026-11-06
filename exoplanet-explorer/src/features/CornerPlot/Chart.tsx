@@ -227,7 +227,14 @@ export function CornerPlotChart({
   }
 
   return (
-    <Stack gap={'xs'} style={standalone ? { height: '100%', minHeight: 520 } : undefined}>
+    <Stack
+      gap={'xs'}
+      style={
+        standalone
+          ? { height: '100%', minHeight: 520 }
+          : { maxWidth: '100%', minWidth: 0 }
+      }
+    >
       {!hideTopBar && (
         <>
           <Group gap={'xs'}>
@@ -257,6 +264,7 @@ export function CornerPlotChart({
           height: standalone ? undefined : defaultHeight,
           minHeight: 420,
           width: standalone ? '100%' : defaultWidth,
+          maxWidth: standalone ? undefined : '100%',
           minWidth: standalone
             ? Math.max(420, selectedNumericColumns.length * 90 + 72)
             : undefined,
