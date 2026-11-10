@@ -5,6 +5,7 @@ import { useResizeObserver, useThrottledValue } from '@mantine/hooks';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks.ts';
 import { setParallelCoordinatesColumnOrder } from '@/redux/local/localSlice.ts';
 import type { Column, DataItem, UncertaintyDataItem } from '@/types/types.ts';
+import { ACTIVE_COLOR } from '@/utils/constants.ts';
 
 import { Axes } from './Axes/Axes.tsx';
 import { CanvasLines } from './Lines/CanvasLines.tsx';
@@ -32,7 +33,7 @@ interface Props {
 
 const margin = { top: 50, right: 50, bottom: 50, left: 50 };
 const extraLeftMargin = 100;
-const extraRightMargin = 50;
+const extraRightMargin = 10;
 
 function useChartLayout(containerWidth: number, containerHeight: number) {
   const extraHeight = 0.1 * containerHeight;
@@ -165,7 +166,14 @@ export function ParallelCoordinatesChart({
   );
 
   return (
-    <Stack gap={'xs'} style={standalone ? { height: '100%', minHeight: 450 } : undefined}>
+    <Stack
+      gap={'xs'}
+      style={
+        standalone
+          ? { height: '100%', minHeight: 450 }
+          : { maxWidth: '100%', minWidth: 0 }
+      }
+    >
       {!hideTopBar && (
         <Group gap={'xs'} align={'center'}>
           <SettingsParallelCoordinates />
@@ -193,6 +201,7 @@ export function ParallelCoordinatesChart({
           maxHeight: standalone ? undefined : maxHeight,
           minHeight: 200,
           width: standalone ? '100%' : defaultWidth,
+          maxWidth: standalone ? undefined : '100%',
           minWidth: standalone ? Math.max(600, dimensions.length * 90 + 250) : undefined,
           overflow: 'hidden'
         }}
@@ -207,7 +216,7 @@ export function ParallelCoordinatesChart({
             <CanvasLines
               {...linesProps}
               data={filteredData.rows}
-              strokeColor={'steelblue'}
+              strokeColor={ACTIVE_COLOR}
             />
 
             {/* Axes */}

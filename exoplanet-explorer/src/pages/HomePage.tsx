@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Box, Group, Loader } from '@mantine/core';
+import { Alert, Box, Group, Loader, Splitter } from '@mantine/core';
 
 import { CornerPlot } from '@/features/CornerPlot/CornerPlot';
 import { ParallelCoordinates } from '@/features/ParallelCoordinates/ParallelCoordinates';
@@ -75,15 +75,17 @@ export function HomePage() {
     <>
       {warning}
       <Group align={'flex-start'} wrap={'nowrap'}>
-        <Box flex={1}>
-          <Group align={'flex-start'}>
-            <ParallelCoordinates />
-            <CornerPlot />
-          </Group>
-        </Box>
-        <Box w={300}>
-          <SelectionList />
-        </Box>
+        <Splitter w={'100%'}>
+          <Splitter.Pane defaultSize={'90%'}>
+            <Group align={'flex-start'} w={'100%'} style={{ minWidth: 0 }}>
+              <ParallelCoordinates />
+              <CornerPlot />
+            </Group>
+          </Splitter.Pane>
+          <Splitter.Pane defaultSize={'20%'} min={'5%'}>
+            <SelectionList />
+          </Splitter.Pane>
+        </Splitter>
       </Group>
     </>
   );

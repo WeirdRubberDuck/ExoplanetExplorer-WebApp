@@ -1,13 +1,19 @@
 import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
+import { useInactiveColor } from '@/hooks/colors';
+import type { CornerPlotRenderMode } from '@/redux/local/localSlice';
 import type { Column } from '@/types/types';
+import { ACTIVE_COLOR } from '@/utils/constants';
 
-import { buildDensityBins, type CornerPoint, getCellKey } from '../helpers';
+import {
+  buildDensityBins,
+  type CornerPoint,
+  getCellKey,
+  getCellRenderMode
+} from '../helpers';
 
 const SCATTER_POINT_SIZE = 2;
-const SELECTED_POINT_COLOR = '#4C84C3';
-const MUTED_POINT_COLOR = '#8CA3BD';
 const SCATTER_RENDER_CHUNK_SIZE = 500;
 
 interface Margin {
@@ -24,7 +30,7 @@ interface Props {
   selectedNumericColumns: Column[];
   cellSize: number;
   cellPointsByKey: Map<string, CornerPoint[]>;
-  renderMode: 'scatter' | 'density';
+  renderMode: CornerPlotRenderMode;
   invertLayout: boolean;
   hasActiveCornerFilter: boolean;
   visiblePointIdSet: Set<number> | undefined;
@@ -43,6 +49,8 @@ export function CanvasLayer({
   visiblePointIdSet
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const inactiveColor = useInactiveColor();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -66,15 +74,21 @@ export function CanvasLayer({
     context.save();
     context.translate(margin.left, margin.top);
 
-    const scatterCells = selectedNumericColumns.flatMap((yColumn, rowIndex) => {
+    const renderedCells = selectedNumericColumns.flatMap((yColumn, rowIndex) => {
       return selectedNumericColumns
         .map((xColumn, colIndex) => {
-          const isScatterCell = invertLayout ? rowIndex < colIndex : rowIndex > colIndex;
+          const cellRenderMode = getCellRenderMode(
+            rowIndex,
+            colIndex,
+            renderMode,
+            invertLayout
+          );
 
-          if (!isScatterCell) {
+          if (cellRenderMode === undefined) {
             return undefined;
           }
           return {
+            renderMode: cellRenderMode,
             xColumn,
             yColumn,
             xCellOffset: colIndex * cellSize,
@@ -85,10 +99,12 @@ export function CanvasLayer({
         .filter((cell): cell is NonNullable<typeof cell> => cell !== undefined);
     });
 
+    const scatterCells = renderedCells.filter((cell) => cell.renderMode === 'scatter');
+    const densityCells = renderedCells.filter((cell) => cell.renderMode === 'density');
     let rafId: number | undefined;
 
-    if (renderMode === 'density') {
-      scatterCells.forEach((cell) => {
+    if (densityCells.length > 0) {
+      densityCells.forEach((cell) => {
         const { points, xCellOffset, yCellOffset } = cell;
         const selectedPoints =
           visiblePointIdSet === undefined
@@ -134,7 +150,9 @@ export function CanvasLayer({
 
         context.restore();
       });
+    }
 
+    if (scatterCells.length === 0) {
       context.restore();
       context.globalAlpha = 1;
       return;
@@ -145,6 +163,7 @@ export function CanvasLayer({
     let chunkStart = 0;
 
     function renderScatterChunk() {
+      rafId = undefined;
       const chunkEnd = Math.min(
         chunkStart + SCATTER_RENDER_CHUNK_SIZE,
         maxPointsInAnyCell
@@ -160,8 +179,8 @@ export function CanvasLayer({
         ctx.clip();
 
         if (hasActiveCornerFilter) {
-          ctx.globalAlpha = 0.08;
-          ctx.fillStyle = MUTED_POINT_COLOR;
+          ctx.globalAlpha = 0.6;
+          ctx.fillStyle = inactiveColor;
           chunk.forEach((point) => {
             if (visiblePointIdSet?.has(point.id)) {
               return;
@@ -176,7 +195,7 @@ export function CanvasLayer({
         }
 
         ctx.globalAlpha = hasActiveCornerFilter ? 0.72 : 0.6;
-        ctx.fillStyle = SELECTED_POINT_COLOR;
+        ctx.fillStyle = ACTIVE_COLOR;
         chunk.forEach((point) => {
           if (hasActiveCornerFilter && !visiblePointIdSet?.has(point.id)) {
             return;
@@ -206,6 +225,7 @@ export function CanvasLayer({
     return () => {
       if (rafId !== undefined) {
         cancelAnimationFrame(rafId);
+        context.restore();
       }
       context.globalAlpha = 1;
     };
@@ -215,6 +235,7 @@ export function CanvasLayer({
     chartHeight,
     chartWidth,
     hasActiveCornerFilter,
+    inactiveColor,
     margin.left,
     margin.top,
     renderMode,

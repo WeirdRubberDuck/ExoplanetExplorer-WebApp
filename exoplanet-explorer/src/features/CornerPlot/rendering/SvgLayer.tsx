@@ -1,5 +1,6 @@
 import { type MouseEvent, useId } from 'react';
 
+import type { CornerPlotRenderMode } from '@/redux/local/localSlice';
 import type { Column, UncertaintyDataItem } from '@/types/types';
 import { HIGHLIGHT_COLOR } from '@/utils/constants';
 
@@ -8,6 +9,7 @@ import {
   type BrushDraft,
   type CornerPoint,
   getCellKey,
+  getCellRenderMode,
   getTranslatedBrush,
   type MovingBrushDraft
 } from '../helpers';
@@ -33,6 +35,7 @@ interface Props {
   cellPointsByKey: Map<string, CornerPoint[]>;
   hoveredId: number | undefined;
   hoveredUncertainty: UncertaintyDataItem | undefined;
+  renderMode: CornerPlotRenderMode;
   invertLayout: boolean;
   brushDraft: BrushDraft | undefined;
   activeBrushes: ActiveBrush[];
@@ -60,6 +63,7 @@ export function SvgLayer({
   cellPointsByKey,
   hoveredId,
   hoveredUncertainty,
+  renderMode,
   invertLayout,
   brushDraft,
   activeBrushes,
@@ -99,9 +103,9 @@ export function SvgLayer({
             const cellKey = getCellKey(xColumn, yColumn);
             const points = cellPointsByKey.get(cellKey) ?? [];
             const hoveredPoint = points.find((point) => point.id === hoveredId);
-            const isScatterCell = invertLayout
-              ? rowIndex < colIndex
-              : rowIndex > colIndex;
+            const isRenderedCell =
+              getCellRenderMode(rowIndex, colIndex, renderMode, invertLayout) !==
+              undefined;
 
             const isDiagonalCell = rowIndex === colIndex;
 
@@ -131,7 +135,7 @@ export function SvgLayer({
                   />
                 )}
 
-                {isScatterCell && (
+                {isRenderedCell && (
                   <rect
                     width={cellSize}
                     height={cellSize}
@@ -144,7 +148,7 @@ export function SvgLayer({
                   />
                 )}
 
-                {brushDraft && brushDraft.cellKey === cellKey && (
+                {isRenderedCell && brushDraft && brushDraft.cellKey === cellKey && (
                   <rect
                     x={Math.min(brushDraft.x0, brushDraft.x1)}
                     y={Math.min(brushDraft.y0, brushDraft.y1)}
@@ -157,7 +161,7 @@ export function SvgLayer({
                 )}
 
                 {activeBrushes.map((brush, brushIndex) => {
-                  if (brush.cellKey !== cellKey) {
+                  if (!isRenderedCell || brush.cellKey !== cellKey) {
                     return null;
                   }
 
@@ -183,7 +187,7 @@ export function SvgLayer({
                   );
                 })}
 
-                {isScatterCell && hoveredPoint && (
+                {isRenderedCell && hoveredPoint && (
                   <>
                     <g clipPath={`url(#${clipPathPrefix}-${rowIndex}-${colIndex})`}>
                       <ErrorBars

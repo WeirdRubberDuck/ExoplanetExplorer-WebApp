@@ -66,7 +66,9 @@ export function readColumnPreferences(datasetKey: string): ColumnPreferences | u
         selectedColumns: parsed.cornerPlot.selectedColumns,
         settings: {
           renderMode:
-            corner?.renderMode === 'scatter' || corner?.renderMode === 'density'
+            corner?.renderMode === 'scatter' ||
+            corner?.renderMode === 'density' ||
+            corner?.renderMode === 'both'
               ? corner.renderMode
               : undefined,
           invertLayout: readBoolean(corner?.invertLayout),

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { MdSearch } from 'react-icons/md';
-import { Box, CloseButton, Paper, Text, TextInput, Title } from '@mantine/core';
+import { Box, CloseButton, Text, TextInput, Title } from '@mantine/core';
 import { useResizeObserver } from '@mantine/hooks';
 
 import { useBaseDataset, useFilteredIds } from '@/hooks/data';
@@ -65,7 +65,7 @@ export function SelectionList() {
   const totalHeight = idsToRender.length * rowHeight;
 
   return (
-    <Paper p={'xs'}>
+    <Box>
       <Title order={4}>{`Planets (${idsToRender.length})`}</Title>
 
       <TextInput
@@ -114,6 +114,6 @@ export function SelectionList() {
           </Box>
         </Box>
       )}
-    </Paper>
+    </Box>
   );
 }

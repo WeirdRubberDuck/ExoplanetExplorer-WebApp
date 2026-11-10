@@ -1,3 +1,4 @@
+import type { CornerPlotRenderMode } from '@/redux/local/localSlice';
 import type { Column, DataItem } from '@/types/types';
 
 import { getNumericValue, type NumericScale } from './util';
@@ -44,6 +45,23 @@ export interface MovingBrushDraft {
 
 export function getCellKey(xColumn: Column, yColumn: Column): string {
   return `${xColumn}-${yColumn}`;
+}
+
+export function getCellRenderMode(
+  rowIndex: number,
+  colIndex: number,
+  renderMode: CornerPlotRenderMode,
+  invertLayout: boolean
+): 'scatter' | 'density' | undefined {
+  if (rowIndex === colIndex) {
+    return undefined;
+  }
+
+  const isPrimaryTriangle = invertLayout ? rowIndex < colIndex : rowIndex > colIndex;
+  if (renderMode === 'both') {
+    return isPrimaryTriangle ? 'scatter' : 'density';
+  }
+  return isPrimaryTriangle ? renderMode : undefined;
 }
 
 export function clampToCell(value: number, cellSize: number): number {

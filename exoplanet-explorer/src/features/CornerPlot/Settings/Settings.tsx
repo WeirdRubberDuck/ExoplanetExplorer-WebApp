@@ -14,7 +14,10 @@ import { useDisclosure } from '@mantine/hooks';
 
 import { OpenChartWindow } from '@/components/OpenChartWindow';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { setCornerPlotSettings } from '@/redux/local/localSlice';
+import {
+  type CornerPlotRenderMode,
+  setCornerPlotSettings
+} from '@/redux/local/localSlice';
 
 import { CornerPlotColumnSelection } from './ColumnSelection';
 
@@ -59,7 +62,7 @@ export function CornerPlotSettings() {
             onChange={(value) =>
               dispatch(
                 setCornerPlotSettings({
-                  renderMode: value as 'scatter' | 'density'
+                  renderMode: value as CornerPlotRenderMode
                 })
               )
             }
@@ -67,11 +70,12 @@ export function CornerPlotSettings() {
             <Group mt={4}>
               <Radio value={'scatter'} label={'Scatter'} />
               <Radio value={'density'} label={'Density bins'} />
+              <Radio value={'both'} label={'Scatter + density bins'} />
             </Group>
           </Radio.Group>
 
           <Checkbox
-            label={'Invert layout (show scatter matrix in upper-right triangle)'}
+            label={'Swap upper/lower triangle layout'}
             checked={settings.invertLayout}
             onChange={(event) =>
               dispatch(
