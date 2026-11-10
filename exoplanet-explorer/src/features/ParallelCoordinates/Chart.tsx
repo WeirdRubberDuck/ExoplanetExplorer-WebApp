@@ -33,7 +33,7 @@ interface Props {
 
 const margin = { top: 50, right: 50, bottom: 50, left: 50 };
 const extraLeftMargin = 100;
-const extraRightMargin = 50;
+const extraRightMargin = 10;
 
 function useChartLayout(containerWidth: number, containerHeight: number) {
   const extraHeight = 0.1 * containerHeight;
