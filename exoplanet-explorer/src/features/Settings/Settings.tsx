@@ -77,9 +77,7 @@ export function Settings() {
             label={'Object name column'}
             value={objectNameColumn}
             onChange={(value) => dispatch(setObjectNameColumn(value))}
-            data={columns
-              .filter((col: string) => columnData[col].type === 'string')
-              .map((col) => ({ value: col, label: col }))}
+            data={columns.map((col) => ({ value: col, label: col }))}
             searchable
           />
 
