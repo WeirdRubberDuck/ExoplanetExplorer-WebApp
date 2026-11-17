@@ -1,12 +1,13 @@
 import { createAsyncThunk, isAnyOf } from '@reduxjs/toolkit';
 
 import { api } from '@/api/api';
-import { onOpenConnection } from '@/redux/connection/connectionSlice';
+import { ConnectionStatus, onOpenConnection } from '@/redux/connection/connectionSlice';
 import type { AppStartListening } from '@/redux/listenerMiddleware';
 import {
   initializeDatasetColumns,
   resetCornerPlotColumns,
   resetParallelCoordinates,
+  setAutoSyncOpenSpaceSelection,
   setCornerPlotSelectedColumns,
   setCornerPlotSettings,
   setCrossFilteringSettings,
@@ -128,6 +129,36 @@ export const addDataListener = (startListening: AppStartListening) => {
           settings: cornerSettings
         }
       });
+    }
+  });
+
+  // Subscriptions only push changes, so read the current filtering when autosync is enabled
+  startListening({
+    actionCreator: setAutoSyncOpenSpaceSelection,
+    effect: async (action, listenerApi) => {
+      if (
+        !action.payload ||
+        listenerApi.getState().connection.connectionStatus !== ConnectionStatus.Connected
+      ) {
+        return;
+      }
+      try {
+        const [rows, active] = await Promise.all([
+          api.getProperty(
+            'Modules.ExoplanetExplorer.FilteredDataRows',
+            'IntListProperty'
+          ),
+          api.getProperty('Modules.ExoplanetExplorer.HasActiveFilters', 'BoolProperty')
+        ]);
+        if (rows.type === 'property' && Array.isArray(rows.value.value)) {
+          listenerApi.dispatch(setFilteredPlanetsFromOpenSpace(rows.value.value));
+        }
+        if (active.type === 'property' && typeof active.value.value === 'boolean') {
+          listenerApi.dispatch(setHasActiveFilters(active.value.value));
+        }
+      } catch (error) {
+        console.error('Could not read OpenSpace filtering:', error);
+      }
     }
   });
 
