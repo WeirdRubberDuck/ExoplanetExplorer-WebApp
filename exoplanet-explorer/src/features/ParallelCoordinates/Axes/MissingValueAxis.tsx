@@ -11,6 +11,7 @@ interface Props {
 export function MissingValueAxis({ dimension, y, onBrush }: Props) {
   const [brushMode, setBrushMode] = useState<NanBrushMode | undefined>(undefined);
   const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   function colorForMode(mode: NanBrushMode | undefined) {
     if (mode === NanBrushMode.Block) return 'rgba(220, 0, 0)';
@@ -46,6 +47,11 @@ export function MissingValueAxis({ dimension, y, onBrush }: Props) {
       cy={y}
       r={hovered ? 7 : 5}
       fill={colorForMode(brushMode)}
+      stroke={focused ? 'currentColor' : 'none'}
+      strokeWidth={1}
+      style={{ outline: 'none' }}
+      onFocus={(event) => setFocused(event.currentTarget.matches(':focus-visible'))}
+      onBlur={() => setFocused(false)}
       onClick={onClick}
       role={'button'}
       tabIndex={0}

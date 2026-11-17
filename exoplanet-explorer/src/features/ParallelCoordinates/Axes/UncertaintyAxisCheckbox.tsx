@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { useState } from 'react';
 
 interface Props {
   checked: boolean;
@@ -16,6 +17,7 @@ export function UncertaintyAxisCheckbox({
   onChange
 }: Props) {
   const halfSize = size / 2;
+  const [focused, setFocused] = useState(false);
   const checkmark = d3.line()([
     [0.2 * size, 0.5 * size],
     [0.4 * size, 0.69 * size],
@@ -35,6 +37,9 @@ export function UncertaintyAxisCheckbox({
       aria-label={'Show uncertainty axis'}
       aria-checked={checked}
       tabIndex={0}
+      style={{ outline: 'none' }}
+      onFocus={(event) => setFocused(event.currentTarget.matches(':focus-visible'))}
+      onBlur={() => setFocused(false)}
       onClick={handleClick}
       onKeyDown={(event) => {
         if (event.key === ' ' || event.key === 'Enter') {
@@ -44,7 +49,15 @@ export function UncertaintyAxisCheckbox({
       }}
     >
       {' '}
-      <rect ry={2} rx={2} width={size} height={size} stroke={'darkgray'} fill={'white'} />
+      <rect
+        ry={2}
+        rx={2}
+        width={size}
+        height={size}
+        stroke={focused ? 'var(--mantine-primary-color-filled)' : 'darkgray'}
+        strokeWidth={1}
+        fill={'white'}
+      />
       <path
         d={checkmark || undefined}
         stroke={checked ? 'var(--mantine-primary-color-filled)' : 'none'}
