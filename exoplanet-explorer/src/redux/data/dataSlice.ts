@@ -171,10 +171,17 @@ export const dataSlice = createSlice({
         const isNumeric = values.length > 0 && numericRatio > 0.8;
 
         if (isNumeric) {
+          let min = Infinity;
+          let max = -Infinity;
+          for (const value of numericValues) {
+            min = Math.min(min, value);
+            max = Math.max(max, value);
+          }
+
           state.columnData[key] = {
             type: 'number',
-            min: Math.min(...numericValues),
-            max: Math.max(...numericValues),
+            min,
+            max,
             isUncertainty: key.endsWith('err1') || key.endsWith('err2')
           };
         } else {

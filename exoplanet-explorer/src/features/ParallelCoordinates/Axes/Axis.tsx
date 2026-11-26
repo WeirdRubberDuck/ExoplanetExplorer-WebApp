@@ -7,6 +7,7 @@ interface Props {
   dimension: Dimension;
   handleBrush: (dimension: Dimension, y0: number, y1: number) => void;
   handleBrushClear?: (dimension: Dimension) => void;
+  updateOnBrushEnd: boolean;
   brushSelection?: [number, number];
   onMovePrevious?: () => void;
   onMoveNext?: () => void;
@@ -16,6 +17,7 @@ export function Axis({
   dimension,
   handleBrush,
   handleBrushClear,
+  updateOnBrushEnd,
   brushSelection,
   onMovePrevious,
   onMoveNext
@@ -28,12 +30,14 @@ export function Axis({
   const brushBehaviorRef = useRef<d3.BrushBehavior<unknown> | null>(null);
   const handleBrushRef = useRef(handleBrush);
   const handleBrushClearRef = useRef(handleBrushClear);
+  const updateOnBrushEndRef = useRef(updateOnBrushEnd);
   const brushWidth = 7;
 
   useEffect(() => {
     handleBrushRef.current = handleBrush;
     handleBrushClearRef.current = handleBrushClear;
-  }, [handleBrush, handleBrushClear]);
+    updateOnBrushEndRef.current = updateOnBrushEnd;
+  }, [handleBrush, handleBrushClear, updateOnBrushEnd]);
 
   // Axis setup
   useEffect(() => {
@@ -106,7 +110,10 @@ export function Axis({
         [brushWidth, dimension.scale.range()[0]]
       ])
       .on('brush end', (event) => {
-        if (!event.sourceEvent) {
+        if (
+          !event.sourceEvent ||
+          (updateOnBrushEndRef.current && event.type === 'brush')
+        ) {
           return;
         }
 
@@ -132,8 +139,7 @@ export function Axis({
 
     const group = d3.select(brushRef.current);
     const currentSelection = d3.brushSelection(brushRef.current) as
-      | [number, number]
-      | null;
+      [number, number] | null;
     const nextSelection = brushSelection ?? null;
 
     const areEqual =

@@ -3,8 +3,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import { startupConfig } from '@/utils/urlConfig';
 
 import { connectionReducer } from './connection/connectionSlice';
-import { dataSlice } from './data/dataSlice';
-import { localSlice, setAutoSyncOpenSpaceSelection } from './local/localSlice';
+import { dataSlice, setFilteredPlanetsFromOpenSpace } from './data/dataSlice';
+import {
+  localSlice,
+  setAutoSyncOpenSpaceSelection,
+  setCornerPlotFilteredIds,
+  setParallelCoordinatesFilteredIds
+} from './local/localSlice';
 import { listenerMiddleware } from './listenerMiddleware';
 
 export const store = configureStore({
@@ -14,7 +19,24 @@ export const store = configureStore({
     local: localSlice.reducer
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat([listenerMiddleware.middleware])
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredPaths: [
+          'data.full',
+          'data.uncertainty',
+          'data.columnData',
+          'data.filteredPlanetsFromOpenSpace',
+          'local.parallelCoordinates.filteredIds',
+          'local.cornerPlot.filteredIds'
+        ],
+        ignoredActionPaths: ['meta.arg', 'meta.baseQueryMeta', 'payload.rows'],
+        ignoredActions: [
+          setFilteredPlanetsFromOpenSpace.type,
+          setParallelCoordinatesFilteredIds.type,
+          setCornerPlotFilteredIds.type
+        ]
+      }
+    }).concat([listenerMiddleware.middleware])
 });
 
 if (startupConfig.autoSync !== undefined) {

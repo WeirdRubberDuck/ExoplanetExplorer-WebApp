@@ -1,7 +1,7 @@
 import { type MouseEvent, useId } from 'react';
 
 import type { CornerPlotRenderMode } from '@/redux/local/localSlice';
-import type { Column, UncertaintyDataItem } from '@/types/types';
+import type { Column, DataItem, UncertaintyDataItem } from '@/types/types';
 import { HIGHLIGHT_COLOR } from '@/utils/constants';
 
 import {
@@ -9,6 +9,7 @@ import {
   type BrushDraft,
   type CornerPoint,
   getCellKey,
+  getCellPointsFromRows,
   getCellRenderMode,
   getTranslatedBrush,
   type MovingBrushDraft
@@ -33,7 +34,7 @@ interface Props {
   scales: Map<Column, NumericScale>;
   cellSize: number;
   cellPointsByKey: Map<string, CornerPoint[]>;
-  hoveredId: number | undefined;
+  hoveredItem: DataItem | undefined;
   hoveredUncertainty: UncertaintyDataItem | undefined;
   renderMode: CornerPlotRenderMode;
   invertLayout: boolean;
@@ -61,7 +62,7 @@ export function SvgLayer({
   scales,
   cellSize,
   cellPointsByKey,
-  hoveredId,
+  hoveredItem,
   hoveredUncertainty,
   renderMode,
   invertLayout,
@@ -102,10 +103,13 @@ export function SvgLayer({
             const yCellOffset = rowIndex * cellSize;
             const cellKey = getCellKey(xColumn, yColumn);
             const points = cellPointsByKey.get(cellKey) ?? [];
-            const hoveredPoint = points.find((point) => point.id === hoveredId);
             const isRenderedCell =
               getCellRenderMode(rowIndex, colIndex, renderMode, invertLayout) !==
               undefined;
+            const hoveredPoint =
+              isRenderedCell && hoveredItem
+                ? getCellPointsFromRows([hoveredItem], xColumn, yColumn, scales)[0]
+                : undefined;
 
             const isDiagonalCell = rowIndex === colIndex;
 

@@ -1,0 +1,55 @@
+---
+sidebar_position: 1
+---
+
+import star_glyph_categorical_mapping from './assets/star_glyph_categorical_mapping.png';
+import glyphmode_rings from './assets/glyphmode_rings.png';
+import glyphmode_inclination from './assets/glyphmode_inclination.png';
+import glyphmode_inclination_and_star from './assets/glyphmode_inclination_and_star.png';
+import compact_glyphmode_rings_twocolors from './assets/compact_glyphmode_rings_twocolors.png';
+
+# Color Mapping & Glyph Modes
+
+## Color Mapping
+
+Numeric properties can be mapped with a **linear** or **logarithmic** scale. String properties use **categorical** mapping, assigning a color to each category from a set of default colors. You can change individual category colors, but those changes are not currently saved.
+
+<div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', textAlign: 'center' }}>
+    <figure style={{ flex: '1 1 400px', maxWidth: '500px', margin: 0 }}>
+        <img src={glyphmode_rings} alt="Ring Glyph Example" style={{ height: '300px', width: 'auto', maxWidth: '100%', objectFit: 'contain' }} />
+        <figcaption>Ring glyphs show planetary systems as concentric rings.</figcaption>
+    </figure>
+    <figure style={{ flex: '1 1 400px', maxWidth: '500px', margin: 0 }}>
+        <img src={star_glyph_categorical_mapping} alt="Star Glyph Categorical Mapping Example" style={{ height: '300px', width: 'auto', maxWidth: '100%', objectFit: 'contain' }} />
+        <figcaption>Star glyphs colored by a categorical property.</figcaption>
+    </figure>
+</div>
+
+### Multiple Mappings
+
+Ring glyphs can be colored by up to four different parameters, allowing for a detailed visual representation of the planetary system's properties. To apply multiple color mappings, click "Add variable" at the bottom of the Color mapping view.
+
+<figure>
+    <img src={compact_glyphmode_rings_twocolors} alt="Compact Glyphmode Rings Two Colors Example" style={{ height: '300px', width: 'auto', maxWidth: '100%', objectFit: 'contain', display: 'block', margin: '0 auto' }} />
+    <figcaption style={{ textAlign: 'center' }}>Ring glyphs colored by two parameters. Here, the right half of each ring shows the planet's mass, and the left half its orbital eccentricity.</figcaption>
+</figure>
+
+## Glyph Modes
+
+Glyph modes change how each planetary system is represented in the [Spatial Overview](/guide/basics/views#spatial-overview):
+
+- **Ring:** Shows concentric rings, which can be colored by up to four parameters.
+- **Star:** Adds a star glyph that can be colored by one parameter.
+- **Inclination:** Shows planetary orbits at their inclinations as viewed from Earth. When the data is available, the glyph also shows the star's inclination and rotation axis. Planets without inclination data can use a default orientation and are shown with dashed orbits.
+
+Star and Inclination modes can be combined, with separate color mappings for the planet ring and star.
+
+<figure>
+    <img src={glyphmode_inclination} alt="Inclination Glyph Example" style={{ width: '600px', height: 'auto', maxWidth: '100%', objectFit: 'contain', display: 'block', margin: '0 auto' }}  />
+    <figcaption style={{ textAlign: 'center' }}>Inclination glyph showing planetary orbits at their inclinations. The white lines show the star's rotation axis.</figcaption>
+</figure>
+
+<figure>
+    <img src={glyphmode_inclination_and_star} alt="Inclination and Star Glyph Example" style={{ width: '600px', height: 'auto', maxWidth: '100%', objectFit: 'contain', display: 'block', margin: '0 auto' }}  />
+    <figcaption style={{ textAlign: 'center' }}>Inclination and Star glyph showing planetary orbits at their inclinations. The first color mapping is applied to the planetary rings, while the second color mapping is applied to the star.</figcaption>
+</figure>

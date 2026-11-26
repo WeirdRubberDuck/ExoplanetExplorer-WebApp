@@ -1,0 +1,27 @@
+---
+sidebar_position: 3
+---
+
+# Data and Configuration
+
+The OpenSpace ExoplanetExplorer ships with a pre-aggregated dataset for immediate use, called `aggregated_data.csv`. However, this will not automatically update when new data becomes available, so you may need to update it manually using the datapreparation script.
+
+## Update the Dataset
+
+To update the loaded dataset in the OpenSpace ExoplanetExplorer, simply run the datapreparation script located at `modules/exoplanetexplorer/scripts/datapreparation.py`.
+
+This will update the aggregated data file used by the ExoplanetExplorer using the latest data from the NASA Exoplanet Archive to display the updated dataset.
+
+## Customizing the Data
+
+If you want to customize the data used by the ExoplanetExplorer, you can modify the datapreparation script to include or exclude specific columns, apply filters, or transform the data as needed before generating the aggregated data file.
+
+You can also create your own custom data preparation scripts if you need to perform more complex transformations or integrate additional data sources. In this case, make sure that your custom script generates an aggregated data file compatible with the ExoplanetExplorer, that is, based on the data model from the [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/). This is required for the 3D visualization of the system to work correctly.
+
+More details on customizing the data preparation process can be found in the [Loading a Custom Dataset](../setup/custom-data) section.
+
+## Customizing the Configuration
+
+The ExoplanetExplorer allows you to customize which paramers behavior and appearance through a JSON configuration file. The default configuration file is `settings_exoplanets.json`, located in the `modules/exoplanetexplorer/scripts` directory.
+
+You can edit this file to adjust various settings such as display options, default filters, and visualization preferences. If you need a different configuration for a custom dataset, you can create a new JSON configuration file and point the ExoplanetExplorer to use it. More details can be found in the [Configuration](../setup/configuration) section.

@@ -1,0 +1,43 @@
+---
+sidebar_position: 1
+---
+
+# Getting Started
+
+Welcome to the **OpenSpace ExoplanetExplorer** documentation. This guide will help you get started with exploring exoplanets using the tool.
+
+## Download
+
+Download and install the **OpenSpace ExoplanetExplorer** application, which is currently a separate version of the OpenSpace software tailored for exoplanet exploration.
+
+[Download OpenSpace ExoplanetExplorer here](https://liuonline-my.sharepoint.com/:u:/g/personal/emmbr26_liu_se/IQBhgWWhnm4LTL-lsPUPiiP2AeaB4fC9qTEDzvopYWcmTHM?e=zCMjxS)
+
+## Running the Application
+
+Once installed, launch the application using the `bin/OpenSpace.exe` with the `exoplanet_explorer` profile (set as the active profile by default). The application comes shipped with pre-configured settings and a dataset based on the [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/) for exoplanet exploration, but to really make use of the tool we recomend updating the loading dataset regularly. You can also customize the data included in the tool.
+
+## Updating the Dataset
+
+To ensure you have the latest exoplanet data, periodically update the dataset within the application. This is done through a datapreparation script at: `modules/exoplanetexplorer/scripts/datapreparation.py`.
+
+More information on updating and customizing the dataset can be found in the [Update the Loaded Dataset](basics/update-data) section and the [Load a Custom Dataset](setup/custom-data) section.
+
+## File Locations
+
+The **OpenSpace ExoplanetExplorer** application stores its files in specific locations within the installation directory. Some key locations in the `modules/exoplanetexplorer/` directory within the installation folder:
+| Location | Description |
+| --- | --- |
+| `scripts/` | Scripts for updating and preparing the dataset. This is also where the default configuration files are located. |
+| `data/` | Directory containing the module's data files. Add your custom data files here if needed, and they will be accessible directly by the application and the accompanying webpage. |
+| `data/filters/` | Location for saved filters. |
+| `cache/` | Cache directory used by the OpenSpace ExoplanetExplorer for temporary files and data. Feel free to clear this cache if needed. |
+
+:::note
+The locations for saved and custom data files are currently within the `modules/exoplanetexplorer/data/` directory. We know this is inconvenient, and will change it in the future once the software is in a more stable state. The plan is to instead use a location in the user folder.
+:::
+
+Other relevant files used by the application include:
+- `data/assets/exoplanetexplorer/`: Assets relevant to the OpenSpace ExoplanetExplorer, such as actions and some visual elements.
+- `profiles/exoplanet_explorer.profile`: Profile configuration for the OpenSpace ExoplanetExplorer.
+
+

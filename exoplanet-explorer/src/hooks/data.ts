@@ -1,31 +1,48 @@
 // Use either the full dataset in redux, or a filtered dataset from OpenSpace,
 
 import { useMemo } from 'react';
+import { createSelector } from '@reduxjs/toolkit';
 
 import { useAppSelector } from '@/redux/hooks';
+import type { RootState } from '@/redux/store';
 
 // depending on the autoSyncOpenSpaceSelection setting in redux
-export function useBaseDataset() {
-  const autoSyncOpenSpaceSelection = useAppSelector(
-    (state) => state.local.autoSyncOpenSpaceSelection
-  );
-
-  const fullDataset = useAppSelector((state) => state.data.full);
-  const filteredIds = useAppSelector((state) => state.data.filteredPlanetsFromOpenSpace);
-  const hasActiveFilters = useAppSelector((state) => state.data.hasActiveFilters);
-
-  const filteredDataset = useMemo(() => {
-    if (filteredIds === undefined) {
+const selectBaseDataset = createSelector(
+  [
+    (state: RootState) => state.local.autoSyncOpenSpaceSelection,
+    (state: RootState) => state.data.full,
+    (state: RootState) => state.data.filteredPlanetsFromOpenSpace,
+    (state: RootState) => state.data.hasActiveFilters
+  ],
+  (autoSyncOpenSpaceSelection, fullDataset, filteredIds, hasActiveFilters) => {
+    if (
+      !autoSyncOpenSpaceSelection ||
+      hasActiveFilters !== true ||
+      filteredIds === undefined
+    ) {
       return fullDataset;
     }
-    return fullDataset.filter((planet) => filteredIds.includes(planet.id));
-  }, [fullDataset, filteredIds]);
-
-  if (!autoSyncOpenSpaceSelection || hasActiveFilters !== true) {
-    return fullDataset;
+    const filteredIdSet = new Set(filteredIds);
+    return fullDataset.filter((planet) => filteredIdSet.has(planet.id));
   }
+);
 
-  return filteredDataset;
+export function useBaseDataset() {
+  return useAppSelector(selectBaseDataset);
+}
+
+export function useHoveredDatasetItem(data: ReturnType<typeof useBaseDataset>) {
+  const fullDataset = useAppSelector((state) => state.data.full);
+  const hoveredId = useAppSelector((state) => state.local.hoveredId);
+  const filteredIdSet = useMemo(
+    () => (data === fullDataset ? undefined : new Set(data.map((row) => row.id))),
+    [data, fullDataset]
+  );
+
+  if (hoveredId === undefined || (filteredIdSet && !filteredIdSet.has(hoveredId))) {
+    return undefined;
+  }
+  return fullDataset[hoveredId];
 }
 
 export function useFilteredIds() {

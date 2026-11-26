@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as d3 from 'd3';
 
 import { useInactiveColor } from '@/hooks/colors';
@@ -14,7 +14,7 @@ import {
 } from '../helpers';
 
 const SCATTER_POINT_SIZE = 2;
-const SCATTER_RENDER_CHUNK_SIZE = 500;
+const INITIAL_SCATTER_RENDER_CHUNK_SIZE = 500;
 
 interface Margin {
   top: number;
@@ -51,6 +51,21 @@ export function CanvasLayer({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const inactiveColor = useInactiveColor();
+  const densityBinsByKey = useMemo(() => {
+    const bins = new Map<string, ReturnType<typeof buildDensityBins>>();
+    selectedNumericColumns.forEach((yColumn, rowIndex) => {
+      selectedNumericColumns.forEach((xColumn, colIndex) => {
+        if (
+          getCellRenderMode(rowIndex, colIndex, renderMode, invertLayout) !== 'density'
+        ) {
+          return;
+        }
+        const key = getCellKey(xColumn, yColumn);
+        bins.set(key, buildDensityBins(cellPointsByKey.get(key) ?? [], cellSize));
+      });
+    });
+    return bins;
+  }, [cellPointsByKey, cellSize, invertLayout, renderMode, selectedNumericColumns]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -106,24 +121,14 @@ export function CanvasLayer({
     if (densityCells.length > 0) {
       densityCells.forEach((cell) => {
         const { points, xCellOffset, yCellOffset } = cell;
-        const selectedPoints =
-          visiblePointIdSet === undefined
-            ? points
-            : points.filter((point) => visiblePointIdSet.has(point.id));
 
         context.save();
         context.beginPath();
         context.rect(xCellOffset, yCellOffset, cellSize, cellSize);
         context.clip();
 
-        const allBins = buildDensityBins(
-          points.map((point) => ({ x: point.x, y: point.y })),
-          cellSize
-        );
-        const selectedBins = buildDensityBins(
-          selectedPoints.map((point) => ({ x: point.x, y: point.y })),
-          cellSize
-        );
+        const allBins =
+          densityBinsByKey.get(getCellKey(cell.xColumn, cell.yColumn)) ?? [];
         const maxCount = d3.max(allBins, (bin) => bin.count) ?? 1;
         const densityScale = d3
           .scaleSequential(d3.interpolateYlOrRd)
@@ -136,6 +141,11 @@ export function CanvasLayer({
         });
 
         if (hasActiveCornerFilter) {
+          const selectedPoints =
+            visiblePointIdSet === undefined
+              ? points
+              : points.filter((point) => visiblePointIdSet.has(point.id));
+          const selectedBins = buildDensityBins(selectedPoints, cellSize);
           selectedBins.forEach((bin) => {
             context.fillStyle = densityScale(bin.count);
             context.globalAlpha = 0.92;
@@ -161,13 +171,12 @@ export function CanvasLayer({
     const maxPointsInAnyCell = d3.max(scatterCells, (cell) => cell.points.length) ?? 0;
     const ctx = context;
     let chunkStart = 0;
+    let chunkSize = INITIAL_SCATTER_RENDER_CHUNK_SIZE;
 
     function renderScatterChunk() {
       rafId = undefined;
-      const chunkEnd = Math.min(
-        chunkStart + SCATTER_RENDER_CHUNK_SIZE,
-        maxPointsInAnyCell
-      );
+      const startTime = performance.now();
+      const chunkEnd = Math.min(chunkStart + chunkSize, maxPointsInAnyCell);
 
       scatterCells.forEach((cell) => {
         const { points, xCellOffset, yCellOffset } = cell;
@@ -213,6 +222,8 @@ export function CanvasLayer({
 
       chunkStart = chunkEnd;
       if (chunkStart < maxPointsInAnyCell) {
+        const elapsed = Math.max(performance.now() - startTime, 1);
+        chunkSize = Math.max(100, Math.min(8000, Math.round((chunkSize * 8) / elapsed)));
         rafId = requestAnimationFrame(renderScatterChunk);
       } else {
         ctx.restore();
@@ -231,6 +242,7 @@ export function CanvasLayer({
     };
   }, [
     cellPointsByKey,
+    densityBinsByKey,
     cellSize,
     chartHeight,
     chartWidth,

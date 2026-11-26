@@ -250,6 +250,7 @@ function initializeColumns(): ColumnInitializationResult {
 export function usePlanetDataInitialization() {
   const [startupInfo, setStartupInfo] = useState<PlanetDataStartupInfo>();
   const [error, setError] = useState<string>();
+  const [isSyncing, setIsSyncing] = useState(false);
   const connectionStatus = useAppSelector((state) => state.connection.connectionStatus);
   const hasLoadedData = useRef(false);
 
@@ -278,20 +279,22 @@ export function usePlanetDataInitialization() {
       }
 
       const currentRequestId = ++requestId;
-      const hostedDataLocation = loadedDataFile
-        ? await readStringProperty(hostedDataLocationProperty)
-        : undefined;
-      const hostedRelativePath =
-        loadedDataFile && hostedDataLocation
-          ? getHostedRelativePath(loadedDataFile, hostedDataLocation)
-          : undefined;
-
-      // Abort if this request is no longer the latest or the effect is inactive
-      if (!active || currentRequestId !== requestId) {
-        return;
-      }
+      setIsSyncing(true);
 
       try {
+        const hostedDataLocation = loadedDataFile
+          ? await readStringProperty(hostedDataLocationProperty)
+          : undefined;
+        const hostedRelativePath =
+          loadedDataFile && hostedDataLocation
+            ? getHostedRelativePath(loadedDataFile, hostedDataLocation)
+            : undefined;
+
+        // Abort if this request is no longer the latest or the effect is inactive
+        if (!active || currentRequestId !== requestId) {
+          return;
+        }
+
         const dataInitialization = await initializeData(
           hostedRelativePath,
           loadedDataFile,
@@ -317,6 +320,10 @@ export function usePlanetDataInitialization() {
           setError(
             reason instanceof Error ? reason.message : 'Could not load planet data.'
           );
+        }
+      } finally {
+        if (active && currentRequestId === requestId) {
+          setIsSyncing(false);
         }
       }
     };
@@ -359,8 +366,9 @@ export function usePlanetDataInitialization() {
       active = false;
       requestId += 1;
       cancelSubscription();
+      setIsSyncing(false);
     };
   }, [connectionStatus]);
 
-  return { startupInfo, error, setError };
+  return { startupInfo, error, setError, isSyncing };
 }

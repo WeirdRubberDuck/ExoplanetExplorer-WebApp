@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import * as d3 from 'd3';
 
+import { useHoveredDatasetItem } from '@/hooks/data';
 import { useAppSelector } from '@/redux/hooks.ts';
 import type { Column, DataItem, UncertaintyDataItem } from '@/types/types.ts';
 import { HIGHLIGHT_COLOR } from '@/utils/constants.ts';
@@ -92,10 +93,7 @@ export function HighlightedLine({ sourceData, ...props }: Props) {
   );
   const logScaleColumns = useAppSelector((state) => state.local.logScaleColumns);
 
-  const itemData = useMemo(
-    () => sourceData.find((row) => row.id === itemId),
-    [sourceData, itemId]
-  );
+  const itemData = useHoveredDatasetItem(sourceData);
 
   const { dimensions, xScale, yPos } = props;
   const areaPath = useMemo(

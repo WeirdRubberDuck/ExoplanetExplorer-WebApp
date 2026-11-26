@@ -1,6 +1,7 @@
 import { IoMdSettings } from 'react-icons/io';
 import {
   ActionIcon,
+  Alert,
   Checkbox,
   Drawer,
   Group,
@@ -20,9 +21,8 @@ import { ColumnSelection } from './ColumnSelection';
 
 export function SettingsParallelCoordinates() {
   // Parallel coordinates settings from the Redux store
-  const { defaultColumns, settings } = useAppSelector(
-    (state) => state.local.parallelCoordinates
-  );
+  const { defaultColumns, settings, liveBrushingDisabledForLargeDataset } =
+    useAppSelector((state) => state.local.parallelCoordinates);
 
   const [settingsOpened, { open, close }] = useDisclosure(false);
 
@@ -91,6 +91,22 @@ export function SettingsParallelCoordinates() {
               )
             }
           />
+          <Checkbox
+            label={'Update filters while brushing'}
+            checked={!settings.updateOnBrushEnd}
+            onChange={(event) =>
+              dispatch(
+                setParallelCoordinatesSettings({
+                  updateOnBrushEnd: !event.currentTarget.checked
+                })
+              )
+            }
+          />
+          {liveBrushingDisabledForLargeDataset && (
+            <Alert color={'yellow'} role={'status'}>
+              Live updates were turned off because this dataset has more than 10,000 rows.
+            </Alert>
+          )}
 
           <Title order={3} size={'md'}>
             Axes

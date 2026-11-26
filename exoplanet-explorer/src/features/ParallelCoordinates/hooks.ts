@@ -11,7 +11,6 @@ import { addToMap, getClippedDomain, inferDimensions, removeFromMap } from './ut
 
 export interface FilteredDataView {
   rows: DataItem[];
-  ids: number[];
 }
 
 export function useHasUncertaintyColumn() {
@@ -207,9 +206,20 @@ export function useBrushing(data: DataItem[]) {
     setNanBrushes((prev) => addToMap(prev, dimension.key, mode));
   }
 
+  const nanBrushEntries = useMemo(() => Object.entries(nanBrushes), [nanBrushes]);
+  const axisBrushEntries = useMemo(
+    () =>
+      Object.entries(brushes).map(([key, filter]) => ({
+        key,
+        filter,
+        selected: filter.type === 'string' ? new Set(filter.selected) : undefined
+      })),
+    [brushes]
+  );
+
   const passesNanBrushes = useCallback(
     (row: DataItem) => {
-      return Object.entries(nanBrushes).every(([key, mode]) => {
+      return nanBrushEntries.every(([key, mode]) => {
         const value = row[key];
         const hasVal = hasValue(value);
         if (mode === NanBrushMode.Block) {
@@ -221,12 +231,12 @@ export function useBrushing(data: DataItem[]) {
         return true;
       });
     },
-    [nanBrushes]
+    [nanBrushEntries]
   );
 
   const passesAxisBrushes = useCallback(
     (row: DataItem) => {
-      return Object.entries(brushes).every(([key, filter]) => {
+      return axisBrushEntries.every(({ key, filter, selected }) => {
         const value = row[key];
         const hasVal = hasValue(value);
 
@@ -237,10 +247,10 @@ export function useBrushing(data: DataItem[]) {
           );
         }
 
-        return hasVal && filter.selected.includes(String(value));
+        return hasVal && selected!.has(String(value));
       });
     },
-    [brushes]
+    [axisBrushEntries]
   );
 
   const hasActiveFilters = useMemo(
@@ -279,12 +289,7 @@ export function useBrushing(data: DataItem[]) {
   }, [cornerFilterIdSet, localFilteredRows]);
 
   const filteredData = useMemo<FilteredDataView>(() => {
-    const ids = filteredRows.map((row) => row.id);
-
-    return {
-      rows: filteredRows,
-      ids
-    };
+    return { rows: filteredRows };
   }, [filteredRows]);
 
   const getBrushSelection = useCallback(
