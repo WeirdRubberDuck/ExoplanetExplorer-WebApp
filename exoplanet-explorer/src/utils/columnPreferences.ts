@@ -53,6 +53,7 @@ export function readColumnPreferences(datasetKey: string): ColumnPreferences | u
               : undefined,
           showGhostLines: readBoolean(parallel?.showGhostLines),
           showTextOnHighlightedLine: readBoolean(parallel?.showTextOnHighlightedLine),
+          updateOnBrushEnd: readBoolean(parallel?.updateOnBrushEnd),
           clipExtremes: readBoolean(parallel?.clipExtremes),
           axisViolinPlots: {
             show: readBoolean(parallel?.axisViolinPlots?.show),

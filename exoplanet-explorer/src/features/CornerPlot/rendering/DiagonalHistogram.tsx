@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import * as d3 from 'd3';
 
 import type { CornerPoint } from '../helpers';
@@ -11,7 +12,11 @@ interface Props {
   cellSize: number;
 }
 
-export function DiagonalHistogram({ points, xScaleMeta, cellSize }: Props) {
+export const DiagonalHistogram = memo(function DiagonalHistogram({
+  points,
+  xScaleMeta,
+  cellSize
+}: Props) {
   const domainMin = Math.min(...xScaleMeta.domain);
   const domainMax = Math.max(...xScaleMeta.domain);
 
@@ -53,4 +58,4 @@ export function DiagonalHistogram({ points, xScaleMeta, cellSize }: Props) {
       })}
     </>
   );
-}
+});

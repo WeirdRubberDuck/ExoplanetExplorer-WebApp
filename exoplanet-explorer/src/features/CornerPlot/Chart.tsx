@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Box, Button, Group, Loader, Stack, Text } from '@mantine/core';
 import { useResizeObserver, useThrottledValue } from '@mantine/hooks';
 
+import { useHoveredDatasetItem } from '@/hooks/data';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setCornerPlotFilteredIds } from '@/redux/local/localSlice';
 import type { Column, DataItem } from '@/types/types';
@@ -35,6 +36,7 @@ export function CornerPlotChart({
   const { columns, columnData } = useAppSelector((state) => state.data);
   const settings = useAppSelector((state) => state.local.cornerPlot.settings);
   const hoveredId = useAppSelector((state) => state.local.hoveredId);
+  const hoveredItem = useHoveredDatasetItem(data);
   const hoveredUncertainty = useAppSelector((state) =>
     hoveredId === undefined ? undefined : state.data.uncertainty[hoveredId]
   );
@@ -300,7 +302,7 @@ export function CornerPlotChart({
               scales={scales}
               cellSize={cellSize}
               cellPointsByKey={cellPointsByKey}
-              hoveredId={hoveredId}
+              hoveredItem={hoveredItem}
               hoveredUncertainty={hoveredUncertainty}
               renderMode={settings.renderMode}
               invertLayout={settings.invertLayout}

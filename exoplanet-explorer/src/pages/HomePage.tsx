@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Alert, Box, Group, Loader, Splitter } from '@mantine/core';
+import {
+  Alert,
+  Box,
+  Group,
+  Loader,
+  LoadingOverlay,
+  Splitter,
+  Stack,
+  Text
+} from '@mantine/core';
 
 import { CornerPlot } from '@/features/CornerPlot/CornerPlot';
 import { ParallelCoordinates } from '@/features/ParallelCoordinates/ParallelCoordinates';
@@ -9,7 +18,7 @@ import { startupConfig } from '@/utils/urlConfig';
 
 export function HomePage() {
   const [dismissedWarnings, setDismissedWarnings] = useState<string[]>();
-  const { startupInfo, error, setError } = usePlanetDataInitialization();
+  const { startupInfo, error, setError, isSyncing } = usePlanetDataInitialization();
 
   useEffect(() => {
     if (startupConfig.chart) {
@@ -38,6 +47,25 @@ export function HomePage() {
 
   const { warnings, uncertaintyColumns } = startupInfo;
 
+  const syncOverlay = (
+    <LoadingOverlay
+      visible={isSyncing}
+      pos={'fixed'}
+      role={'status'}
+      aria-label={'Syncing data from OpenSpace'}
+      transitionProps={{ duration: 0 }}
+      loaderProps={{
+        style: { width: 'auto', height: 'auto' },
+        children: (
+          <Stack align={'center'} gap={'xs'}>
+            <Loader />
+            <Text size={'sm'}>Syncing data from OpenSpace</Text>
+          </Stack>
+        )
+      }}
+    />
+  );
+
   const warning =
     warnings.length > 0 && warnings !== dismissedWarnings ? (
       <Alert
@@ -55,6 +83,7 @@ export function HomePage() {
   if (startupConfig.chart) {
     return (
       <>
+        {syncOverlay}
         {warning}
         <Box style={{ flex: 1, minHeight: 0, minWidth: 0, overflow: 'auto' }}>
           {startupConfig.chart === 'parallelcoordinates' ? (
@@ -73,6 +102,7 @@ export function HomePage() {
 
   return (
     <>
+      {syncOverlay}
       {warning}
       <Group align={'flex-start'} wrap={'nowrap'}>
         <Splitter w={'100%'}>

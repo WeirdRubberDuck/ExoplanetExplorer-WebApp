@@ -18,6 +18,7 @@ export interface LocalState {
     parallelAffectsCorner: boolean;
   };
   parallelCoordinates: {
+    liveBrushingDisabledForLargeDataset: boolean;
     /**
      * Whether the column selection is currently the default selection. This is used to
      * determine whether to show the "Reset to default" button in the column selection UI.
@@ -40,6 +41,7 @@ export interface LocalState {
       lineOpacity: number;
       showGhostLines: boolean;
       showTextOnHighlightedLine: boolean;
+      updateOnBrushEnd: boolean;
       clipExtremes: boolean;
       axisViolinPlots: {
         show: boolean;
@@ -86,12 +88,14 @@ const initialState: LocalState = {
     parallelAffectsCorner: true
   },
   parallelCoordinates: {
+    liveBrushingDisabledForLargeDataset: false,
     columnSelectionIsDefault: true,
     settings: {
       selectedColumns: pcDefaultColumns,
       lineOpacity: 0.7,
       showGhostLines: true,
       showTextOnHighlightedLine: true,
+      updateOnBrushEnd: false,
       clipExtremes: false,
       axisViolinPlots: {
         show: true,
@@ -144,6 +148,8 @@ export const localSlice = createSlice({
 
       state.objectNameColumn = action.payload.objectNameColumn;
       state.parallelCoordinates.defaultColumns = parallelCoordinates.defaultColumns;
+      state.parallelCoordinates.liveBrushingDisabledForLargeDataset =
+        parallelCoordinates.liveBrushingDisabledForLargeDataset;
 
       state.parallelCoordinates.settings = {
         selectedColumns: parallelCoordinates.selectedColumns,
@@ -152,6 +158,7 @@ export const localSlice = createSlice({
         showTextOnHighlightedLine:
           parallel?.showTextOnHighlightedLine ??
           parallelDefaults.showTextOnHighlightedLine,
+        updateOnBrushEnd: parallel?.updateOnBrushEnd ?? parallelDefaults.updateOnBrushEnd,
         clipExtremes: parallel?.clipExtremes ?? parallelDefaults.clipExtremes,
         axisViolinPlots: {
           show: parallel?.axisViolinPlots?.show ?? parallelDefaults.axisViolinPlots.show,
@@ -270,6 +277,11 @@ export const localSlice = createSlice({
       if (patch.showTextOnHighlightedLine !== undefined) {
         state.parallelCoordinates.settings.showTextOnHighlightedLine =
           patch.showTextOnHighlightedLine;
+      }
+
+      if (patch.updateOnBrushEnd !== undefined) {
+        state.parallelCoordinates.settings.updateOnBrushEnd = patch.updateOnBrushEnd;
+        state.parallelCoordinates.liveBrushingDisabledForLargeDataset = false;
       }
 
       if (patch.clipExtremes !== undefined) {

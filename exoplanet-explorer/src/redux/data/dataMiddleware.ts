@@ -83,10 +83,15 @@ export const addDataListener = (startListening: AppStartListening) => {
   startListening({
     actionCreator: initializeData,
     effect: (_, listenerApi) => {
-      const { columns, columnData, datasetKey } = listenerApi.getState().data;
+      const { columns, columnData, datasetKey, full } = listenerApi.getState().data;
       listenerApi.dispatch(
         initializeDatasetColumns(
-          resolveDatasetColumns(columns, columnData, readColumnPreferences(datasetKey))
+          resolveDatasetColumns(
+            columns,
+            columnData,
+            readColumnPreferences(datasetKey),
+            full.length
+          )
         )
       );
     }
@@ -106,13 +111,18 @@ export const addDataListener = (startListening: AppStartListening) => {
       resetParallelCoordinates,
       resetCornerPlotColumns
     ),
-    effect: (_, listenerApi) => {
+    effect: (action, listenerApi) => {
       const { data, local } = listenerApi.getState();
       if (!data.datasetKey) {
         return;
       }
       const { selectedColumns: parallelColumns, ...parallelSettings } =
         local.parallelCoordinates.settings;
+      const savedBrushMode = readColumnPreferences(data.datasetKey)?.parallelCoordinates
+        .settings?.updateOnBrushEnd;
+      const brushModeChanged =
+        setParallelCoordinatesSettings.match(action) &&
+        action.payload.updateOnBrushEnd !== undefined;
       const { selectedColumns: cornerColumns, ...cornerSettings } =
         local.cornerPlot.settings;
       writeColumnPreferences(data.datasetKey, {
@@ -122,7 +132,12 @@ export const addDataListener = (startListening: AppStartListening) => {
         parallelCoordinates: {
           selectedColumns: parallelColumns,
           columnOrder: local.parallelCoordinates.columnOrder,
-          settings: parallelSettings
+          settings: {
+            ...parallelSettings,
+            updateOnBrushEnd: brushModeChanged
+              ? parallelSettings.updateOnBrushEnd
+              : savedBrushMode
+          }
         },
         cornerPlot: {
           selectedColumns: cornerColumns,

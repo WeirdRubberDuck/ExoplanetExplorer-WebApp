@@ -9,7 +9,7 @@ let initializeData;
 
 before(async () => {
   server = await createServer({
-    server: { middlewareMode: true },
+    server: { middlewareMode: true, hmr: false, ws: false },
     optimizeDeps: { noDiscovery: true },
     appType: 'custom'
   });

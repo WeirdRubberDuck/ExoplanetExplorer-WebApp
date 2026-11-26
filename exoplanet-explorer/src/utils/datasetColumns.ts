@@ -25,6 +25,8 @@ export interface ColumnPreferences {
   };
 }
 
+const LIVE_BRUSHING_MAX_ROWS = 10_000;
+
 export const pcDefaultColumns: Column[] = [
   'discoverymethod',
   'sy_pnum',
@@ -81,7 +83,8 @@ function resolveSelection(
 export function resolveDatasetColumns(
   columns: Column[],
   columnData: Record<Column, ColumnData>,
-  saved?: ColumnPreferences
+  saved?: ColumnPreferences,
+  rowCount = 0
 ) {
   const numericColumns = columns.filter(
     (column) => columnData[column]?.type === 'number'
@@ -115,6 +118,9 @@ export function resolveDatasetColumns(
   const columnOrder = [
     ...new Set([...(saved?.parallelCoordinates.columnOrder ?? []), ...parallelSelected])
   ].filter((column) => parallelSelected.includes(column));
+  const liveBrushingDisabledForLargeDataset =
+    saved?.parallelCoordinates.settings?.updateOnBrushEnd === undefined &&
+    rowCount > LIVE_BRUSHING_MAX_ROWS;
 
   return {
     crossFiltering: saved?.crossFiltering,
@@ -131,7 +137,13 @@ export function resolveDatasetColumns(
         ? saved.objectNameColumn
         : 'pl_name',
     parallelCoordinates: {
-      settings: saved?.parallelCoordinates.settings,
+      liveBrushingDisabledForLargeDataset,
+      settings: {
+        ...saved?.parallelCoordinates.settings,
+        updateOnBrushEnd:
+          saved?.parallelCoordinates.settings?.updateOnBrushEnd ??
+          rowCount > LIVE_BRUSHING_MAX_ROWS
+      },
       defaultColumns: parallelDefaults,
       selectedColumns: parallelSelected,
       columnOrder

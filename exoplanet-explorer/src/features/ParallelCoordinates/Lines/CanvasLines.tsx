@@ -60,12 +60,13 @@ export function CanvasLines({
     // Pre-compute x positions to avoid repeated scale lookups in the inner loop
     const xPositions = dimensions.map((dim) => xScale(dim.key) ?? 0);
 
-    const CHUNK_SIZE = 300;
+    let chunkSize = 300;
     let chunkIndex = 0;
     let rafId: number;
 
     function renderChunk() {
-      const end = Math.min(chunkIndex + CHUNK_SIZE, data.length);
+      const startTime = performance.now();
+      const end = Math.min(chunkIndex + chunkSize, data.length);
 
       ctx!.beginPath();
       for (let i = chunkIndex; i < end; i++) {
@@ -84,6 +85,8 @@ export function CanvasLines({
 
       chunkIndex = end;
       if (chunkIndex < data.length) {
+        const elapsed = Math.max(performance.now() - startTime, 1);
+        chunkSize = Math.max(100, Math.min(8000, Math.round((chunkSize * 8) / elapsed)));
         rafId = requestAnimationFrame(renderChunk);
       } else {
         ctx!.globalAlpha = 1;

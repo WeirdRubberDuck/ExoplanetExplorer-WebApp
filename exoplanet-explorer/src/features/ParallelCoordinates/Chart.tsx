@@ -236,6 +236,7 @@ export function ParallelCoordinatesChart({
                   nanAxisYPos={nanAxisYPos}
                   handleBrush={handleBrush}
                   handleBrushClear={handleBrushClear}
+                  updateOnBrushEnd={settings.updateOnBrushEnd}
                   getBrushSelection={getBrushSelection}
                   handleNanBrush={handleNanBrush}
                   onAxisMove={onAxisMove}
